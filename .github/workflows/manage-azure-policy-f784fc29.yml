@@ -1,0 +1,32 @@
+name: manage-azure-policy-f784fc29
+on:
+  workflow_dispatch:
+    inputs:
+      remarks:
+        description: 'Reason for triggering the workflow run'
+        required: false
+        default: 'Updating Azure Policies'
+
+
+## Uncomment the following if you wish to automatically trigger workflow run with every commit
+#
+#  push:
+#    paths:
+#      - 'key/policies/Key_vaults_should_have_purge_protection_enabled_with_Remediation_da3da9b1-e4e6-4033-8855-d5fa69982dfa/**'
+#      - .github/workflows/manage-azure-policy-f784fc29.yml
+jobs:
+  apply-azure-policy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS_f784fc29}}
+        allow-no-subscriptions: true
+    - name: Create or Update Azure Policies
+      uses: azure/manage-azure-policy@v0
+      with:
+        paths: |
+          key/policies/Key_vaults_should_have_purge_protection_enabled_with_Remediation_da3da9b1-e4e6-4033-8855-d5fa69982dfa/**

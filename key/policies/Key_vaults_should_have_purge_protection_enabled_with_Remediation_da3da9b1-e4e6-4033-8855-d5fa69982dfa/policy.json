@@ -1,0 +1,97 @@
+{
+ "properties": {
+  "displayName": "Key vaults should have purge protection enabled with Remediation",
+  "policyType": "Custom",
+  "mode": "Indexed",
+  "description": "Malicious deletion of a key vault can lead to permanent data loss. A malicious insider in your organization can potentially delete and purge key vaults. Purge protection protects you from insider attacks by enforcing a mandatory retention period for soft deleted key vaults. No one inside your organization or Microsoft will be able to purge your key vaults during the soft delete retention period.",
+  "metadata": {
+   "version": "1.0.0",
+   "category": "Key Vault",
+   "createdBy": "65c0ba7f-fad7-49a5-b6dd-f63aa377cbab",
+   "createdOn": "2023-03-10T08:40:54.279707Z",
+   "updatedBy": "65c0ba7f-fad7-49a5-b6dd-f63aa377cbab",
+   "updatedOn": "2023-03-10T12:50:49.6857641Z"
+  },
+  "parameters": {
+   "effect": {
+    "type": "String",
+    "metadata": {
+     "displayName": "Effect",
+     "description": "Enable or disable the execution of the policy"
+    },
+    "allowedValues": [
+     "Audit",
+     "Deny",
+     "Disabled"
+    ],
+    "defaultValue": "Audit"
+   }
+  },
+  "policyRule": {
+   "if": {
+    "allOf": [
+     {
+      "field": "type",
+      "equals": "Microsoft.KeyVault/vaults"
+     },
+     {
+      "not": {
+       "field": "Microsoft.KeyVault/vaults/createMode",
+       "equals": "recover"
+      }
+     },
+     {
+      "anyOf": [
+       {
+        "field": "Microsoft.KeyVault/vaults/enablePurgeProtection",
+        "exists": "false"
+       },
+       {
+        "field": "Microsoft.KeyVault/vaults/enablePurgeProtection",
+        "equals": "false"
+       }
+      ]
+     }
+    ]
+   },
+   "then": {
+    "effect": "[parameters('effect')]",
+    "details": {
+     "type": "Microsoft.KeyVault/vaults",
+     "name": "[field('name')]",
+     "existenceCondition": {
+      "field": "Microsoft.KeyVault/vaults/enablePurgeProtection",
+      "equals": true
+     },
+     "deployment": {
+      "properties": {
+       "mode": "incremental",
+       "template": {
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "parameters": {},
+        "resources": [
+         {
+          "type": "Microsoft.KeyVault/vaults",
+          "name": "[field('name')]",
+          "apiVersion": "2018-02-14",
+          "location": "[field('location')]",
+          "properties": {
+           "enablePurgeProtection": true
+          }
+         }
+        ]
+       }
+      }
+     },
+     "roleDefinitionIds": [
+      "/providers/Microsoft.Authorization/roleDefinitions/f25e0fa2-a7c8-4377-a976-54943a77a395"
+     ]
+    }
+   }
+  }
+ },
+ "id": "/subscriptions/5c5980fa-d0ce-432c-9593-e0754dbcc41f/providers/Microsoft.Authorization/policyDefinitions/da3da9b1-e4e6-4033-8855-d5fa69982dfa",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "da3da9b1-e4e6-4033-8855-d5fa69982dfa"
+}
